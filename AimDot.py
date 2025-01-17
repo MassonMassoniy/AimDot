@@ -1,26 +1,66 @@
-#created by Masson Massoniy
+# Created by Masson Massoniy.
 
-from tkinter import Tk, Canvas, PhotoImage
+from tkinter import Tk, Canvas, PhotoImage, mainloop
 
-screen = Tk()
-screen.title("Aim Dot")
+class AimDotApp:
+    """AimDotApp is a class that creates a window with an aim dot in the center of the screen."""
 
-screen.attributes("-fullscreen", True)
-screen.attributes("-topmost", True)
-screen.resizable(False, False)
+    def __init__(self, dot_image_path):
+        self.BACKGROUND_COLOR = "#000001"
+        self.dot_image_path = dot_image_path
+        self.screen = None
+        self.dot_image = None
+        self.dot_image_width = None
+        self.dot_image_height = None
+        
+    def initialize_window(self):
+        """Initialize the tkinter window."""
 
-screen.configure(bg= "#000001")
-screen.wm_attributes("-transparentcolor", "#000001")
+        self.screen = Tk()
+        self.screen.title("Aim Dot")
+        self.screen.attributes("-fullscreen", True)
+        self.screen.attributes("-topmost", True)
+        self.screen.resizable(False, False)
+        self.screen.wm_attributes("-transparentcolor", self.BACKGROUND_COLOR)
+        self.screen.configure(bg = self.BACKGROUND_COLOR)
 
-screen_width = screen.winfo_screenwidth()
-screen_height = screen.winfo_screenheight()
-dot_radius = screen_width * 0.001
+    def load_dot_image(self):
+        """Load the dot image."""
 
-dot_image = PhotoImage(file= "dots/x12Dot_Tp_Y.png")
+        self.dot_image = PhotoImage(file = self.dot_image_path)
+        self.dot_image_width = self.dot_image.width()
+        self.dot_image_height = self.dot_image.height()
+    
+    def create_canvas(self):
+        """Create a canvas and display the dot image."""
 
-canvas = Canvas(screen, height= dot_image.height(), width= dot_image.width(), bg= "#000001", highlightthickness=0)
-canvas.place(relx= 0.5, rely= 0.5, anchor= "center")
+        canvas = Canvas(
+            self.screen,
+            height=self.dot_image_height,
+            width=self.dot_image_width,
+            bg=self.BACKGROUND_COLOR,
+            highlightthickness=0
+        )
+        canvas.place(
+            relx=0.5,
+            rely=0.5,
+            anchor="center")
+        canvas.create_image(
+            self.dot_image_width // 2,
+            self.dot_image_height // 2,
+            image=self.dot_image,
+            anchor="center"
+        )
 
-canvas.create_image(dot_image.width() / 2, dot_image.height() / 2, image= dot_image, anchor= "center")
+    def run(self):
+        """Run the application."""
 
-screen.mainloop()
+        self.initialize_window()
+        self.load_dot_image()
+        self.create_canvas()
+        self.screen.mainloop()
+
+if __name__ == "__main__":
+    dot_image_path = r"dots/x12Dot_Tp_Y.png"
+    app = AimDotApp(dot_image_path)
+    app.run()
