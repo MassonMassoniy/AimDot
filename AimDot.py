@@ -1,18 +1,18 @@
 # Created by Masson Massoniy.
 
-from tkinter import Tk, Canvas, Toplevel, StringVar, OptionMenu, Menu, Button, Label, PhotoImage, filedialog, messagebox, _tkinter
+from tkinter import Tk, Canvas, Toplevel, StringVar, OptionMenu, Button, PhotoImage, filedialog, messagebox, _tkinter
 from pystray import MenuItem, Icon
 from PIL import Image, ImageDraw
 
-from os import sys, listdir, execl
+from os import sys, listdir, path
 
 class AimDotApp:
     """AimDotApp is a class that creates a window with an aim dot in the center of the screen."""
 
     def __init__(self):
         self.BACKGROUND_COLOR = "#000001"
-        self.saved_dot_images = listdir("dots") # List of saved dot images
-        self.dot_image_path = r"dots\x8Dot_Tp_Y.png" # Default dot image path
+        self.saved_dot_images = listdir("dots")    # List of saved dot images
+        self.dot_image_path = r"dots\x8Dot_Tp_Y.png"    # Default dot image path
         self.screen = None
         self.dot_image = None
         self.dot_image_width = None
@@ -40,13 +40,14 @@ class AimDotApp:
 
     def _tray_menu(self):
         """Create a tray menu."""
+
         logo = Image.new('RGB', (64, 64), color=(73, 109, 137))
         draw = ImageDraw.Draw(logo)
         draw.rectangle((0, 0, 64, 64), fill=(73, 109, 137))
 
         menu = (
             MenuItem('Select Dot', self._select_dot_window),
-            MenuItem('Quit', self._quit)
+            MenuItem('Quit (Doesn\'t work)', self._quit)
         )
 
         self.tray_icon = Icon("Aim Dot", logo, "AimDot App", menu)
@@ -63,7 +64,7 @@ class AimDotApp:
         self.dot_image_path = file_path if file_path != "" else self.dot_image_path
 
     def _load_dot_image(self):
-        """Load the dot image."""
+        """Load the dot image from the file path."""
 
         try:
             self.dot_image = PhotoImage(file = self.dot_image_path)
@@ -86,29 +87,48 @@ class AimDotApp:
                                 icon = "warning")
     
     def _select_dot_window(self):
-        """Select the dot image."""
+        """Open an option menu for changing the active dot image."""
 
         selector_window = Toplevel(self.screen)
         selector_window.title("Select Aim Dot")
-        selector_window.geometry("300x100")
+        selector_window.geometry("200x100")
         selector_window.resizable(False, False)
 
         clicked = StringVar()
-        clicked.set(self.dot_image_path.split("\\")[-1])
+        clicked.set(path.split(self.dot_image_path)[-1])
 
+        # Drop down menu that displays dot images from the default folder
         drop = OptionMenu(selector_window, clicked, *self.saved_dot_images)
-        drop.pack(pady = 10)
+        drop.place(relx = 0.005,
+                   rely = 0.01,
+                   relwidth = 0.75,
+                   relheight = 0.5)
 
+        # Open the file dialog for selecting a new dot image from any folder
+        add_button = Button(selector_window,
+                            text = "Add new",
+                            command = lambda: (self._open_file_dialog(),
+                                               clicked.set(path.split(self.dot_image_path)[-1])))
+        add_button.place(relx = 0.755,
+                         rely = 0.01,
+                         relwidth = 0.24,
+                         relheight = 0.5,
+                         bordermode = "inside")
+
+        # Apply the selected dot image
         apply_button = Button(selector_window,
                               text = "Apply",
                               command = lambda: (self._apply_dot(clicked.get()),
                                                  selector_window.destroy()))
-        apply_button.pack(pady = 10)
+        apply_button.place(relx = 0.3,
+                           rely = 0.51,
+                           relwidth = 0.4,
+                           relheight = 0.48)
 
     def _apply_dot(self, dot_image):
         """Apply the selected dot image."""
 
-        self.dot_image_path = f"dots\\{dot_image}"
+        self.dot_image_path = f"dots\\{dot_image}" if dot_image in self.saved_dot_images else self.dot_image_path
         self._load_dot_image()
 
         self.canvas.destroy()
@@ -116,7 +136,7 @@ class AimDotApp:
         
 
     def _create_canvas(self):
-        """Display the dot image on the canvas."""
+        """Create a canvas with the dot image on it."""
 
         self.canvas = Canvas(
             self.screen,
@@ -136,12 +156,13 @@ class AimDotApp:
             anchor = "center"
         )
     
+    # Doesn't work
     def _quit(self):
         """Quit the application."""
 
-        self.screen.quit()
-        self.screen.after(0, self.screen.destroy)
-        sys.exit()
+        #self.screen.quit()
+        #self.screen.destroy()
+        #sys.exit()
 
     def run(self):
         """Run the application."""
